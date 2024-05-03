@@ -5,7 +5,7 @@ Deletion-resilient hypermedia pagination
 
 import csv
 import math
-from typing import List
+from typing import List, Dict
 
 
 class Server:
@@ -40,30 +40,35 @@ class Server:
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-            pass
-    
-    def get_hyper_index(index: int = None, page_size: int = 10) -> Dict[str, Any]:
-    assert index is None or (isinstance(index, int) and index >= 0), "Index must be None or a non-negative integer."
-    assert isinstance(page_size, int) and page_size > 0, "Page size must be a positive integer."
+        """
+        Takes 2 integer arguments and returns a dictionary with
+        the following key-value pairs:
+            index: index of the first item in the current page
+            next_index: index of the first item in the next page
+            page_size: the current page size
+            data: actual page of the dataset
+        Args:
+            index(int): first required index
+            page_size(int): required number of records per page
+        """
+        dataset = self.indexed_dataset()
+        data_length = len(dataset)
+        assert 0 <= index < data_length
+        response = {}
+        data = []
+        response['index'] = index
+        for i in range(page_size):
+            while True:
+                curr = dataset.get(index)
+                index += 1
+                if curr is not None:
+                    break
+            data.append(curr)
 
-    dataset = []  # List to store the dataset
-
-    # Read the CSV file and populate the dataset list
-    with open('your_csv_file.csv', 'r') as file:
-        csv_reader = csv.DictReader(file)
-        dataset = list(csv_reader)
-
-    if index is None:
-        index = 0
-    else:
-        assert index <= len(dataset), "Index is out of range."
-
-    next_index = index + page_size
-    data = dataset[index:next_index]
-
-    return {
-        'index': index,
-        'next_index': next_index,
-        'page_size': page_size,
-        'data': data
-    }
+        response['data'] = data
+        response['page_size'] = len(data)
+        if dataset.get(index):
+            response['next_index'] = index
+        else:
+            response['next_index'] = None
+        return response
