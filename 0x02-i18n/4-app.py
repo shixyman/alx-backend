@@ -22,7 +22,6 @@ class Config(object):
 app = Flask(__name__)
 app.config.from_object(Config)
 babel = Babel(app)
-babel.init_app(app)
 
 
 @babel.localeselector
@@ -39,10 +38,10 @@ def get_locale():
 @app.route('/', strict_slashes=False)
 def index() -> str:
     """
-    Handles / route
+    Handles / 
     """
     return render_template('4-index.html')
 
 
 if __name__ == "__main__":
-    app.run(port="5000", host="0.0.0.0", debug=True)
+    app.run(port="8000", host="0.0.0.0", debug=True)
